@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moje turnaje</title>
+<style>
+:root{--bg:#eef2ee;--surface:#fff;--ink:#16231d;--mute:#5f6f66;--line:#d5ddd6;--green:#0f6b4f;--hot:#e8590c;--on:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1612;--surface:#17231c;--ink:#e8f0ea;--mute:#8da095;--line:#2a3b31;--green:#2fb085;--hot:#ff8a4c;--on:#06140e}}
+:root[data-theme="dark"]{--bg:#0e1612;--surface:#17231c;--ink:#e8f0ea;--mute:#8da095;--line:#2a3b31;--green:#2fb085;--hot:#ff8a4c;--on:#06140e}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:560px;margin:0 auto;padding:14px 14px 100px}
+h1{font-size:26px;margin:4px 0;letter-spacing:-.5px}h2{font-size:14px;margin:18px 0 8px;color:var(--mute);font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+button{font:inherit;cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--green);color:var(--on);font-weight:600}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}button.link{background:none;color:var(--mute);padding:6px;font-weight:500}
+button.add{background:var(--hot);color:#fff;border-radius:12px;font-size:20px;line-height:1;padding:8px 16px}
+button.rnd{width:38px;height:38px;border-radius:50%;padding:0;font-size:20px}
+:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+input,select,textarea{font:inherit;width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.t{display:flex;justify-content:space-between;align-items:center;gap:10px}.t b{font-size:17px}.badge{font-size:13px;color:var(--mute)}
+.ico{font-size:28px;margin-right:12px}.av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;margin-right:12px;flex:none}
+.nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+.nav button{flex:1;background:none;color:var(--mute);font-size:13px;padding:6px}.nav button span{display:block;font-size:22px}.nav button.on{color:var(--green)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto}.tabs button{flex:1;white-space:nowrap;background:var(--surface);color:var(--ink);border:1px solid var(--line)}.tabs button.on{background:var(--green);color:var(--on);border-color:var(--green)}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:440px}
+th,td{padding:8px 5px;text-align:center;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}th{font-size:13px;color:var(--mute);font-weight:600}
+td:nth-child(2),th:nth-child(2){text-align:left}tr:nth-child(2) td{font-weight:700}.pts{font-weight:700;color:var(--green)}
+.m{display:grid;grid-template-columns:1fr 54px 12px 54px 1fr;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--line)}.m:last-child{border:0}
+.m span:first-child{text-align:right}.m input{text-align:center;padding:8px 4px}.w{font-weight:700}
+.bracket{display:flex;gap:14px;overflow-x:auto;padding-bottom:8px}.rd{flex:0 0 220px}.rd h3{font-size:13px;color:var(--mute);margin:0 0 8px}
+.bm{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:6px 8px;margin-bottom:10px}
+.bm div{display:grid;grid-template-columns:1fr 46px;gap:6px;align-items:center;padding:3px 0}.bm input{padding:6px 4px;text-align:center}.bm .w{color:var(--green)}.bm .l{color:var(--mute)}
+.champ{background:var(--green);color:var(--on);border-radius:14px;padding:14px;text-align:center;font-size:20px;font-weight:700;margin-bottom:12px}
+.row{display:flex;gap:8px;margin:10px 0;align-items:center}.row label{flex:1}.lbl{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0}.lbl input{width:76px;text-align:center}
+.ctr{display:flex;align-items:center;gap:10px}.empty{color:var(--mute);padding:24px 4px;text-align:center}
+.up td:first-child{box-shadow:inset 4px 0 var(--green)}.dn td:first-child{box-shadow:inset 4px 0 #c0392b}
+.chk{display:flex;align-items:center;gap:10px;padding:6px 0}.chk input{width:22px;height:22px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+<main id="app"></main>
+<script>
+var KEY='turnaje-v2',SP={futbal:'⚽',florbal:'🏑',hokej:'🏒',pong:'🍺',stolny:'🏓',basket:'🏀',volejbal:'🏐',tenis:'🎾',sach:'♟️',sipky:'🎯',hra:'🎮',ine:'🏆'},
+SN={futbal:'Futbal',florbal:'Florbal',hokej:'Hokej',pong:'Beer pong',stolny:'Stolný tenis',basket:'Basketbal',volejbal:'Volejbal',tenis:'Tenis',sach:'Šach',sipky:'Šípky',hra:'Videohra',ine:'Iné'},
+COL=['#0f6b4f','#e8590c','#2b6cb0','#8e44ad','#c0392b','#b7791f','#2c7a7b'];
+var S={players:[],teams:[],t:[],tab:'t',cur:null,sub:'tab',form:null,col:{}};
+try{var d=JSON.parse(localStorage.getItem(KEY)||'{}');S.players=d.players||[];S.teams=d.teams||[];S.t=d.t||[];S.col=d.col||{}}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({players:S.players,teams:S.teams,t:S.t,col:S.col}))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function cur(){return S.t.find(function(x){return x.id===S.cur})}
+function num(v){return v===''||v==null||isNaN(+v)?null:+v}
+function colr(n){return S.col[n]||COL[(n.charCodeAt(0)+n.length)%COL.length]}
+function av(n){var c=colr(n);return '<div class="av" style="background:'+c+'">'+esc(n.charAt(0).toUpperCase())+'</div>'}
+
+function fixtures(p,enc){var a=p.slice(),out=[];if(a.length%2)a.push(null);var n=a.length,per=n-1;
+for(var e=0;e<enc;e++){var b=a.slice();for(var r=0;r<per;r++){for(var i=0;i<n/2;i++){var x=b[i],y=b[n-1-i];if(x&&y)out.push(e%2?{a:y,b:x,sa:null,sb:null,r:e*per+r+1}:{a:x,b:y,sa:null,sb:null,r:e*per+r+1})}
+b.splice(1,0,b.pop())}}return out}
+function table(t){var m={};t.players.forEach(function(p){m[p]={n:p,p:0,w:0,d:0,l:0,gf:0,ga:0,pts:t.bonus[p]||0}});
+t.matches.forEach(function(x){if(x.sa==null||x.sb==null)return;var A=m[x.a],B=m[x.b];A.p++;B.p++;A.gf+=x.sa;A.ga+=x.sb;B.gf+=x.sb;B.ga+=x.sa;
+if(x.sa>x.sb){A.w++;B.l++;A.pts+=t.pw;B.pts+=t.pl}else if(x.sa<x.sb){B.w++;A.l++;B.pts+=t.pw;A.pts+=t.pl}else{A.d++;B.d++;A.pts+=t.pd;B.pts+=t.pd}});
+return Object.values(m).sort(function(a,b){return b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||a.n.localeCompare(b.n)})}
+function seedOrder(s){var o=[0];while(o.length<s){var l=o.length*2;o=o.flatMap(function(x){return[x,l-1-x]})}return o}
+function winner(a,b,s){if(a==null&&b==null)return null;if(b==null)return a;if(a==null)return b;if(s&&s[0]!=null&&s[1]!=null&&s[0]!==s[1])return s[0]>s[1]?a:b;return null}
+function rounds(k){var sd=k.seeds,size=1;while(size<sd.length)size*=2;var c=seedOrder(size).map(function(i){return i<sd.length?sd[i]:null}),out=[],r=0;
+while(c.length>1){var ms=[],nx=[];for(var i=0;i<c.length;i+=2){var s=k.scores[r+'-'+i/2],w=winner(c[i],c[i+1],s);ms.push({a:c[i],b:c[i+1],s:s,w:w,key:r+'-'+i/2,bye:c[i]==null||c[i+1]==null});nx.push(w)}out.push(ms);c=nx;r++}
+return{rounds:out,champ:c[0]}}
+function rname(i,n){var f=n-i;return f===1?'Finále':f===2?'Semifinále':f===3?'Štvrťfinále':(i+1)+'. kolo'}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+
+function render(){var h='';
+if(S.form)h=formHtml();else if(S.cur)h=detailHtml();else{
+var T={t:'Turnaje',m:'Tímy',p:'Hráči'}[S.tab];
+h='<div class="top"><h1>'+T+'</h1>'+(S.tab==='t'?'<button class="add" data-new="1" aria-label="Nový turnaj">+</button>':'')+'</div>';
+if(S.tab==='t'){if(!S.t.length)h+='<div class="empty">Zatiaľ žiadny turnaj. Klepni na + a vytvor prvý.</div>';
+S.t.forEach(function(t){h+='<div class="card t"><div class="t" style="flex:1;cursor:pointer" data-open="'+t.id+'"><span class="ico">'+(SP[t.sport]||'🏆')+'</span><div style="flex:1"><b>'+esc(t.name)+'</b><div class="badge">'+t.players.length+(t.kind==='m'?' tímov':' hráčov')+' · '+(t.mode==='liga'?'Liga':t.mode==='ko'?'Pavúk':'Liga + pavúk')+'</div></div></div><button class="link" data-del="'+t.id+'">Zmazať</button></div>'});h+=BKUP}
+else{var L=S.tab==='m'?S.teams:S.players;
+h+='<div class="row"><input id="add-in" placeholder="'+(S.tab==='m'?'Názov tímu':'Meno hráča')+'"><button data-addp="1">Pridať</button></div>';
+if(!L.length)h+='<div class="empty">Zoznam je prázdny.</div>';
+L.forEach(function(n,i){h+='<div class="card t"><div class="t">'+av(n)+'<span>'+esc(n)+'</span></div><input type="color" data-col="'+esc(n)+'" value="'+colr(n)+'" aria-label="Farba" style="width:46px;height:36px;padding:2px"><button class="link" data-rm="'+i+'">Zmazať</button></div>'})}
+h+='<nav class="nav">'+[['t','🏆','Turnaje'],['m','👥','Tímy'],['p','👤','Hráči']].map(function(x){return '<button class="'+(S.tab===x[0]?'on':'')+'" data-nav="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+'</button>'}).join('')+'</nav>'}
+document.getElementById('app').innerHTML=h}
+
+function formHtml(){var F=S.form,L=F.kind==='m'?S.teams:S.players;
+var h='<div class="top"><button class="link" data-cancel="1">‹ Zrušiť</button></div><h1>Nový turnaj</h1><div class="card">';
+h+='<label>Názov<input id="f-name" value="'+esc(F.name)+'" placeholder="napr. Eduard Cup"></label><h2>Účastníci</h2><select id="f-kind" data-fk="1"><option value="p"'+(F.kind==='p'?' selected':'')+'>Jednotlivci</option><option value="m"'+(F.kind==='m'?' selected':'')+'>Tímy / dvojice</option></select>';
+h+='<h2>Formát</h2><select id="f-mode">'+[['liga','Liga'],['ko','Pavúk (knockout)'],['both','Liga + pavúk']].map(function(o){return '<option value="'+o[0]+'"'+(F.mode===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select>';
+h+='<h2>Šport</h2><select id="f-sport">'+Object.keys(SP).map(function(k){return '<option value="'+k+'"'+(F.sport===k?' selected':'')+'>'+SP[k]+' '+SN[k]+'</option>'}).join('')+'</select>';
+h+='<h2>Pravidlá ligy</h2>'+num3('Počet vzájomných zápasov','f-enc',F.enc)+num3('Body za výhru','f-pw',F.pw)+num3('Body za remízu','f-pd',F.pd)+num3('Body za prehru','f-pl',F.pl);
+h+='<h2>Vyber účastníkov ('+F.sel.length+')</h2>';
+if(!L.length)h+='<div class="badge">Zoznam je prázdny, pridaj ich nižšie.</div>';
+L.forEach(function(n,i){h+='<label class="chk"><input type="checkbox" data-sel="'+i+'"'+(F.sel.indexOf(n)>=0?' checked':'')+'>'+esc(n)+'</label>'});
+h+='<div class="row"><input id="f-add" placeholder="Pridať nového"><button class="ghost" data-qadd="1">Pridať</button></div>';
+return h+'<button data-create="1" style="width:100%;margin-top:8px">Vytvoriť turnaj</button></div>'}
+function num3(l,id,v){return '<div class="lbl"><span>'+l+'</span><input id="'+id+'" type="number" inputmode="numeric" value="'+v+'"></div>'}
+function readForm(){var F=S.form,g=function(i){return document.getElementById(i)};if(!g('f-name'))return;F.name=g('f-name').value;F.mode=g('f-mode').value;F.sport=g('f-sport').value;
+F.enc=num(g('f-enc').value)||1;F.pw=num(g('f-pw').value)||0;F.pd=num(g('f-pd').value)||0;F.pl=num(g('f-pl').value)||0}
+
+function detailHtml(){var t=cur(),tabs=[];
+if(t.mode!=='ko')tabs.push(['tab','Tabuľka'],['zap','Zápasy']);if(t.mode!=='ko')tabs.push(['st','Štatistiky'],['gr','Vývoj']);if(t.mode!=='liga')tabs.push(['ko','Pavúk']);tabs.push(['set','Nastavenia']);
+if(!tabs.some(function(x){return x[0]===S.sub}))S.sub=tabs[0][0];
+var h='<div class="top"><button class="link" data-back="1">‹ Späť</button></div><h1>'+(SP[t.sport]||'🏆')+' '+esc(t.name)+'</h1><div class="tabs">'+tabs.map(function(x){return '<button class="'+(S.sub===x[0]?'on':'')+'" data-sub="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>';
+return h+(S.sub==='tab'?tabHtml(t):S.sub==='zap'?zapHtml(t):S.sub==='ko'?koHtml(t):S.sub==='st'?stHtml(t):S.sub==='gr'?grHtml(t):setHtml(t))}
+
+function tabHtml(t){var tb=table(t),h='',done=t.matches.length&&t.matches.every(function(m){return m.sa!=null&&m.sb!=null});
+if(done&&t.mode==='liga')h+='<div class="champ">🏆 '+esc(tb[0].n)+'</div>';
+h+='<div class="card scroll"><table><tr><th>#</th><th>Meno</th><th>Z</th><th>V</th><th>R</th><th>P</th><th>+/-</th><th>Rozdiel</th><th>Body</th></tr>';
+tb.forEach(function(r,i){var df=r.gf-r.ga;h+='<tr class="'+(i<(t.up||0)?'up':i>=tb.length-(t.down||0)?'dn':'')+'"><td>'+(i+1)+'</td><td>'+esc(r.n)+'</td><td>'+r.p+'</td><td>'+r.w+'</td><td>'+r.d+'</td><td>'+r.l+'</td><td>'+r.gf+':'+r.ga+'</td><td>'+(df>0?'+':'')+df+'</td><td class="pts">'+r.pts+'</td></tr>'});
+h+='</table></div>';if(t.up||t.down)h+='<div class="badge">Zelená = postup, červená = zostup</div>';return h}
+function zapHtml(t){var h='<div class="card">',last=0;
+t.matches.forEach(function(m,i){if(m.r!==last){last=m.r;h+='<div class="badge" style="padding-top:8px"><b>'+m.r+'. kolo</b></div>'}
+var w=m.sa!=null&&m.sb!=null;
+h+='<div class="m"><span class="'+(w&&m.sa>m.sb?'w':'')+'">'+esc(m.a)+'</span><input type="number" inputmode="numeric" data-ms="'+i+':sa" value="'+(m.sa==null?'':m.sa)+'" aria-label="Skóre '+esc(m.a)+'"><span>:</span><input type="number" inputmode="numeric" data-ms="'+i+':sb" value="'+(m.sb==null?'':m.sb)+'" aria-label="Skóre '+esc(m.b)+'"><span style="text-align:left" class="'+(w&&m.sb>m.sa?'w':'')+'">'+esc(m.b)+'</span></div><div class="row" style="margin:0 0 4px"><input type="date" data-md="'+i+':d" value="'+(m.d||'')+'" aria-label="Dátum"><input data-md="'+i+':p" value="'+esc(m.p||'')+'" placeholder="Miesto" aria-label="Miesto"></div>'});
+return h+'</div>'}
+function koHtml(t){var h='';
+if(!t.ko)return '<div class="card"><p style="margin-top:0">Pavúk sa nasadí '+(t.mode==='both'?'podľa tabuľky ligy.':'podľa poradia účastníkov alebo náhodne.')+' Účastníkov: '+t.players.length+'.</p><div class="row"><button data-genko="o">Vygenerovať</button>'+(t.mode==='ko'?'<button class="ghost" data-genko="r">Náhodne</button>':'')+'</div></div>';
+var R=rounds(t.ko);if(R.champ)h+='<div class="champ">🏆 '+esc(R.champ)+'</div>';
+h+='<div class="bracket">';R.rounds.forEach(function(rd,i){h+='<div class="rd"><h3>'+rname(i,R.rounds.length)+'</h3>';
+rd.forEach(function(m){var s=m.s||[null,null];function ln(nm,ix){var win=m.w!=null&&m.w===nm,lose=m.w!=null&&nm!=null&&m.w!==nm;
+return '<div><span class="'+(win?'w':lose?'l':'')+'">'+(nm==null?(m.bye?'—':'čaká sa'):esc(nm))+'</span>'+(m.bye||nm==null?'<span></span>':'<input type="number" inputmode="numeric" data-ks="'+m.key+':'+ix+'" value="'+(s[ix]==null?'':s[ix])+'">')+'</div>'}
+h+='<div class="bm">'+ln(m.a,0)+ln(m.b,1)+'</div>'});h+='</div>'});
+return h+'</div><div class="row"><button class="ghost" data-genko="'+(t.mode==='ko'?'r':'o')+'">Nový pavúk</button></div>'}
+function stHtml(t){var tb=table(t),pl=tb.filter(function(r){return r.p}),pm=t.matches.filter(function(m){return m.sa!=null&&m.sb!=null});
+if(!pm.length)return '<div class="empty">Zatiaľ nie sú odohrané zápasy.</div>';
+function top(f,asc){return pl.slice().sort(function(a,b){return asc?f(a)-f(b):f(b)-f(a)})[0]}
+var g=pm.reduce(function(s,m){return s+m.sa+m.sb},0),bg=pm.slice().sort(function(a,b){return Math.abs(b.sa-b.sb)-Math.abs(a.sa-a.sb)})[0],
+a=top(function(r){return r.gf}),d=top(function(r){return r.ga},1),w=top(function(r){return r.w}),
+rows=[['Najlepší útok',a.n+' ('+a.gf+' gólov)'],['Najlepšia obrana',d.n+' ('+d.ga+' inkasovaných)'],['Najviac výhier',w.n+' ('+w.w+')'],['Najvyššia výhra',esc(bg.a)+' '+bg.sa+':'+bg.sb+' '+esc(bg.b)],['Odohrané zápasy',pm.length+' z '+t.matches.length],['Góly spolu',g+' (priemer '+(g/pm.length).toFixed(1)+' na zápas)']];
+return '<div class="card">'+rows.map(function(r){return '<div class="lbl"><span>'+r[0]+'</span><b style="text-align:right">'+r[1]+'</b></div>'}).join('')+'</div>'}
+function grHtml(t){var sc=t.matches.filter(function(m){return m.sa!=null&&m.sb!=null});if(!sc.length)return '<div class="empty">Zatiaľ nie sú odohrané zápasy.</div>';
+var Rn=Math.max.apply(null,sc.map(function(m){return m.r})),P0={},mx=1,r;
+t.players.forEach(function(p){P0[p]=[];for(r=0;r<=Rn;r++)P0[p].push(0)});
+sc.forEach(function(m){var a=m.sa>m.sb?t.pw:m.sa<m.sb?t.pl:t.pd,b=m.sa<m.sb?t.pw:m.sa>m.sb?t.pl:t.pd;for(var r=m.r;r<=Rn;r++){P0[m.a][r]+=a;P0[m.b][r]+=b}});
+t.players.forEach(function(p){P0[p].forEach(function(v){if(v>mx)mx=v})});
+var h='<div class="card"><svg viewBox="0 0 360 250" style="width:100%" role="img" aria-label="Vývoj bodov"><line x1="30" y1="220" x2="350" y2="220" stroke="var(--line)"/><line x1="30" y1="10" x2="30" y2="220" stroke="var(--line)"/><text x="4" y="16" font-size="11" fill="var(--mute)">'+mx+'</text><text x="12" y="224" font-size="11" fill="var(--mute)">0</text><text x="280" y="242" font-size="11" fill="var(--mute)">kolo '+Rn+'</text>';
+t.players.forEach(function(p){h+='<polyline fill="none" stroke="'+colr(p)+'" stroke-width="2.5" points="'+P0[p].map(function(v,i){return (30+i/Rn*310).toFixed(1)+','+(220-v/mx*205).toFixed(1)}).join(' ')+'"/>'});
+h+='</svg>';t.players.forEach(function(p){h+='<span class="badge" style="margin-right:12px;white-space:nowrap"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+colr(p)+';margin-right:4px"></span>'+esc(p)+'</span>'});
+return h+'</div>'}
+function setHtml(t){var h='<div class="card"><label>Názov<input data-set="name" value="'+esc(t.name)+'"></label>';
+if(t.mode!=='ko')h+='<h2>Pravidlá ligy</h2>'+setRow('Počet vzájomných zápasov','enc',t.enc)+setRow('Body za výhru','pw',t.pw)+setRow('Body za remízu','pd',t.pd)+setRow('Body za prehru','pl',t.pl)+setRow('Postupujúci (zelená)','up',t.up||0)+setRow('Zostupujúci (červená)','down',t.down||0)+'<button class="ghost" data-regen="1" style="width:100%;margin-top:6px">Pregenerovať zápasy (zmaže skóre)</button>';
+h+='</div>';
+if(t.mode!=='ko'){h+='<h2>Bonusové a trestné body</h2><div class="card">';
+t.players.forEach(function(p,i){h+='<div class="lbl"><span>'+esc(p)+'</span><div class="ctr"><button class="rnd" data-b="'+i+':-1" aria-label="Odpočítať">−</button><b style="min-width:26px;text-align:center">'+(t.bonus[p]||0)+'</b><button class="rnd" data-b="'+i+':1" aria-label="Pridať">+</button></div></div>'});h+='</div>'}
+return h+'<h2>Export</h2><button class="ghost" data-xl="1" style="width:100%">Exportovať do Excelu (.xlsx)</button>'}
+var BKUP='<h2>Záloha dát</h2><div class="card"><div class="row"><button class="ghost" data-bk="dl">Stiahnuť</button><button class="ghost" data-bk="cp">Kopírovať</button></div><div class="row"><button class="ghost" data-bk="file">Import zo súboru</button><button class="ghost" data-bk="paste">Import vložením</button></div><input type="file" id="imp" accept=".json,application/json" hidden></div>';
+function dl(name,blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)}
+function dump(){return JSON.stringify({players:S.players,teams:S.teams,t:S.t,col:S.col})}
+function bk(k){if(k==='dl')dl('turnaje-zaloha.json',new Blob([dump()],{type:'application/json'}));
+else if(k==='cp'){try{navigator.clipboard.writeText(dump()).then(function(){alert('Záloha je skopírovaná. Vlož ju do poznámok.')},function(){alert('Kopírovanie sa nepodarilo.')})}catch(e){alert('Kopírovanie sa nepodarilo.')}}
+else if(k==='file')document.getElementById('imp').click();
+else if(k==='paste'){var x=prompt('Vlož zálohu (JSON):');if(x)imp(x)}}
+function imp(txt){try{var d=JSON.parse(txt);if(!Array.isArray(d.t))throw 0;if(!confirm('Import nahradí všetky súčasné dáta. Pokračovať?'))return;
+S.players=d.players||[];S.teams=d.teams||[];S.t=d.t;S.col=d.col||{};S.cur=null;save();render()}catch(e){alert('Záloha je neplatná.')}}
+function exportXlsx(t){if(typeof XLSX==='undefined'){alert('Knižnica pre Excel sa nenačítala (treba internet).');return}
+var wb=XLSX.utils.book_new(),f=function(n,rows){XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),n)};
+if(t.mode!=='ko'){var tb=table(t);f('Tabuľka',[['#','Meno','Zápasy','Výhry','Remízy','Prehry','Strelené','Inkasované','Rozdiel','Body']].concat(tb.map(function(r,i){return [i+1,r.n,r.p,r.w,r.d,r.l,r.gf,r.ga,r.gf-r.ga,r.pts]})));
+f('Zápasy',[['Kolo','Domáci','Skóre domáci','Skóre hostia','Hostia','Dátum','Miesto']].concat(t.matches.map(function(m){return [m.r,m.a,m.sa,m.sb,m.b,m.d||'',m.p||'']})))}
+if(t.ko){var R=rounds(t.ko),rows=[['Kolo','A','B','Skóre A','Skóre B','Víťaz']];R.rounds.forEach(function(rd,i){rd.forEach(function(m){var s=m.s||[null,null];rows.push([rname(i,R.rounds.length),m.a||'',m.b||'',s[0],s[1],m.w||''])})});f('Pavúk',rows)}
+XLSX.writeFile(wb,t.name.replace(/[^\w\-áäčďéíľĺňóôŕšťúýž ]/gi,'_')+'.xlsx')}
+function setRow(l,k,v){return '<div class="lbl"><span>'+l+'</span><input type="number" inputmode="numeric" data-set="'+k+'" value="'+v+'"></div>'}
+
+document.addEventListener('click',function(e){var b=e.target.closest('button,[data-open]');if(!b)return;var d=b.dataset,t=cur();
+if(d.nav){S.tab=d.nav}
+else if(d.new){S.form={name:'',kind:'p',mode:'liga',sport:'futbal',enc:1,pw:3,pd:1,pl:0,sel:[]}}
+else if(d.cancel){S.form=null}
+else if(d.qadd){readForm();var inp=document.getElementById('f-add'),n=inp.value.trim();if(!n)return;var L=S.form.kind==='m'?S.teams:S.players;if(L.indexOf(n)<0)L.push(n);if(S.form.sel.indexOf(n)<0)S.form.sel.push(n);save()}
+else if(d.create){readForm();var F=S.form;if(!F.name.trim()||F.sel.length<2){alert('Zadaj názov a vyber aspoň 2 účastníkov.');return}
+var L2=F.kind==='m'?S.teams:S.players,pl=L2.filter(function(n){return F.sel.indexOf(n)>=0});
+var nt={id:'t'+Date.now(),name:F.name.trim(),kind:F.kind,mode:F.mode,sport:F.sport,players:pl,enc:F.enc,pw:F.pw,pd:F.pd,pl:F.pl,bonus:{},matches:F.mode==='ko'?[]:fixtures(pl,F.enc),ko:null};
+S.t.unshift(nt);S.form=null;S.cur=nt.id;S.sub=F.mode==='ko'?'ko':'tab';save()}
+else if(d.addp){var i2=document.getElementById('add-in'),v=i2.value.trim();if(!v)return;var L3=S.tab==='m'?S.teams:S.players;if(L3.indexOf(v)<0)L3.push(v);save()}
+else if(d.rm){var L4=S.tab==='m'?S.teams:S.players;L4.splice(+d.rm,1);save()}
+else if(d.open){S.cur=d.open;S.sub=cur().mode==='ko'?'ko':'tab'}
+else if(d.del){if(!confirm('Zmazať turnaj?'))return;S.t=S.t.filter(function(x){return x.id!==d.del});save()}
+else if(d.back){S.cur=null}
+else if(d.sub){S.sub=d.sub}
+else if(d.genko){var sd=t.mode==='both'?table(t).map(function(r){return r.n}):(d.genko==='r'?shuffle(t.players):t.players.slice());t.ko={seeds:sd,scores:{}};save()}
+else if(d.b){var p=d.b.split(':'),nm=t.players[+p[0]];t.bonus[nm]=(t.bonus[nm]||0)+ +p[1];save()}
+else if(d.bk){bk(d.bk);return}
+else if(d.xl){exportXlsx(t);return}
+else if(d.regen){if(!confirm('Zápasy sa vytvoria nanovo a skóre sa zmaže. Pokračovať?'))return;t.matches=fixtures(t.players,t.enc);save()}
+else return;
+render()});
+document.addEventListener('change',function(e){var el=e.target,t=cur(),d=el.dataset;
+if(el.id==='imp'){var fl=el.files[0];if(fl)fl.text().then(imp);el.value='';return}
+if(d.col){S.col[d.col]=el.value;save();render();return}
+if(S.form){if(d.fk){readForm();S.form.kind=el.value;S.form.sel=[];render()}else if(d.sel){var L=S.form.kind==='m'?S.teams:S.players,n=L[+d.sel],ix=S.form.sel.indexOf(n);if(el.checked&&ix<0)S.form.sel.push(n);if(!el.checked&&ix>=0)S.form.sel.splice(ix,1);readForm();render()}return}
+if(!t)return;
+if(d.ms){var p=d.ms.split(':');t.matches[+p[0]][p[1]]=num(el.value)}
+else if(d.ks){var q=d.ks.split(':'),s=t.ko.scores[q[0]]||[null,null];s[+q[1]]=num(el.value);t.ko.scores[q[0]]=s}
+else if(d.md){var q2=d.md.split(':');t.matches[+q2[0]][q2[1]]=el.value}
+else if(d.set){t[d.set]=d.set==='name'?(el.value.trim()||t.name):(num(el.value)==null?0:num(el.value))}
+else return;save();render()});
+render();
+</script>
+</body>
+</html>
